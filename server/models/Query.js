@@ -131,6 +131,11 @@ Query.findOneById = id =>
 Query.findAll = () =>
   db.queries.find({}).then(docs => docs.map(doc => new Query(doc)));
 
+Query.findAllByConnectionIds = ids =>
+  db.queries
+    .find({ connectionId: { $in: ids } })
+    .then(docs => docs.map(doc => new Query(doc)));
+
 Query.findByFilter = filter =>
   db.queries.find(filter).then(docs => docs.map(doc => new Query(doc)));
 

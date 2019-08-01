@@ -11,7 +11,8 @@ function ConnectionDropdown({
   connections,
   currentUser,
   selectConnectionId,
-  selectedConnectionId
+  selectedConnectionId,
+  userConnections
 }) {
   const [showEdit, setShowEdit] = useState(false);
   const [showConnections, setShowConnections] = useState(false);
@@ -38,6 +39,15 @@ function ConnectionDropdown({
 
   const className = !selectedConnectionId ? styles.attention : null;
 
+  const decoratedConnections =
+    currentUser.role === 'admin'
+      ? connections.map(connection => {
+          return connection;
+        })
+      : userConnections.map(connection => {
+          return connection;
+        });
+
   return (
     <>
       <Select
@@ -47,7 +57,7 @@ function ConnectionDropdown({
         onChange={handleChange}
       >
         <option value="">... choose connection</option>
-        {connections.map(conn => {
+        {decoratedConnections.map(conn => {
           return (
             <option key={conn._id} value={conn._id} name={conn.name}>
               {conn.name}
@@ -77,6 +87,6 @@ function ConnectionDropdown({
 }
 
 export default connect(
-  ['connections', 'currentUser', 'selectedConnectionId'],
+  ['connections', 'currentUser', 'selectedConnectionId', 'userConnections'],
   { selectConnectionId, addUpdateConnection }
 )(ConnectionDropdown);

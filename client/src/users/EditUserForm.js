@@ -1,16 +1,50 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { connect } from 'unistore/react';
 import { Link } from 'react-router-dom';
+import RSelect from 'react-select';
 import uuid from 'uuid';
 import Button from '../common/Button';
 import FormExplain from '../common/FormExplain';
 import message from '../common/message';
 import Select from '../common/Select';
 import Spacer from '../common/Spacer';
+import { loadConnections } from '../stores/connections';
 import fetchJson from '../utilities/fetch-json.js';
 
-function EditUserForm({ user }) {
+function EditUserForm({ user, connections, loadConnections }) {
   const [role, setRole] = useState(user.role);
   const [passwordResetId, setPasswordResetId] = useState(user.passwordResetId);
+
+  useEffect(() => {
+    loadConnections();
+  }, [loadConnections]);
+
+  const [userConnections, setUserConnections] = useState([]);
+
+  const loadUserConnections = async userId => {
+    const { error, userConnections } = await fetchJson(
+      'GET',
+      '/api/user-connections/' + userId
+    );
+    if (error) {
+      message.error(error);
+    }
+    setUserConnections(userConnections);
+  };
+
+  useEffect(() => {
+    loadUserConnections(user._id);
+  }, [user._id]);
+
+  const [optionDefaultValue, setOptionDefaultValue] = useState([]);
+
+  const handleDefaultValue = () => {
+    setOptionDefaultValue(userConnections);
+  };
+
+  useEffect(() => {
+    handleDefaultValue();
+  });
 
   const handleRoleChange = async event => {
     setRole(event.target.value);
@@ -41,6 +75,27 @@ function EditUserForm({ user }) {
       return message.error('Remove reset failed: ' + json.error.toString());
     }
     setPasswordResetId(null);
+  };
+
+  const handleChangeUserConnections = async selectedItems => {
+    setUserConnections(selectedItems);
+    if (selectedItems === undefined || selectedItems === null) {
+      const json = await fetchJson(
+        'POST',
+        '/api/user-connections/' + user._id,
+        {}
+      );
+      if (json.error) {
+        return message.error('Save failed: ' + json.error.toString());
+      }
+      return;
+    }
+    const json = await fetchJson('POST', '/api/user-connections/' + user._id, {
+      connectionIds: selectedItems.map(item => item._id)
+    });
+    if (json.error) {
+      return message.error('Save failed: ' + json.error.toString());
+    }
   };
 
   const renderReset = () => {
@@ -83,8 +138,25 @@ function EditUserForm({ user }) {
       </FormExplain>
       <Spacer size={3} />
       {renderReset()}
+      <Spacer size={3} />
+      <label>
+        Connections
+        <RSelect
+          isMulti
+          value={optionDefaultValue}
+          options={connections}
+          getOptionLabel={option => option['name']}
+          getOptionValue={option => option['_id']}
+          onChange={handleChangeUserConnections}
+        />
+      </label>
     </div>
   );
 }
 
-export default EditUserForm;
+export default connect(
+  ['connections'],
+  store => ({
+    loadConnections: loadConnections(store)
+  })
+)(EditUserForm);

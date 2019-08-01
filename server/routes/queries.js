@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const Query = require('../models/Query.js');
+const UserConnection = require('../models/UserConnection.js');
 const mustBeAuthenticated = require('../middleware/must-be-authenticated.js');
 const mustBeAuthenticatedOrChartLink = require('../middleware/must-be-authenticated-or-chart-link-noauth.js');
 const sendError = require('../lib/sendError');
@@ -40,8 +41,17 @@ router.delete('/api/queries/:_id', mustBeAuthenticated, async function(
 
 router.get('/api/queries', mustBeAuthenticated, async function(req, res) {
   try {
-    const queries = await Query.findAll();
-    return res.json({ queries });
+    if (req.user.role == 'admin') {
+      const queries = await Query.findAll();
+      return res.json({ queries });
+    } else {
+      const userConnections = await UserConnection.findAllByUserId(
+        req.user._id
+      );
+      const ids = userConnections.map(item => item.connectionId);
+      const queries = await Query.findAllByConnectionIds(ids);
+      return res.json({ queries });
+    }
   } catch (error) {
     sendError(res, error, 'Problem querying query database');
   }

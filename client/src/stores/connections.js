@@ -13,7 +13,8 @@ export const initialState = {
   selectedConnectionId: '',
   connections: [],
   connectionsLastUpdated: null,
-  connectionsLoading: false
+  connectionsLoading: false,
+  userConnections: []
 };
 
 export async function initSelectedConnection(state) {
@@ -77,10 +78,15 @@ export const loadConnections = store => async (state, force) => {
     if (error) {
       message.error(error);
     }
+    const { userConnections } = await fetchJson('GET', '/api/user-connections');
+    if (error) {
+      message.error(error);
+    }
     const update = {
       connectionsLoading: false,
       connectionsLastUpdated: new Date(),
-      connections: sortConnections(connections)
+      connections: sortConnections(connections),
+      userConnections: sortConnections(userConnections)
     };
 
     if (connections && connections.length === 1) {

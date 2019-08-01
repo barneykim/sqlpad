@@ -32,6 +32,13 @@ async function findOneById(id) {
   return decipherConnection(connection);
 }
 
+async function findAllByIds(ids) {
+  const connections = await db.connections.find({ _id: { $in: ids } });
+  return _.sortBy(connections, c => c.name.toLowerCase()).map(
+    decipherConnection
+  );
+}
+
 async function removeOneById(id) {
   return db.connections.remove({ _id: id });
 }
@@ -62,6 +69,7 @@ async function save(connection) {
 
 module.exports = {
   findAll,
+  findAllByIds,
   findOneById,
   removeOneById,
   save

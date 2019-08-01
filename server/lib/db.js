@@ -14,7 +14,17 @@ const db = {
   queries: datastore({ filename: path.join(dbPath, 'queries.db') }),
   cache: datastore({ filename: path.join(dbPath, 'cache.db') }),
   config: datastore({ filename: path.join(dbPath, 'config.db') }),
-  instances: ['users', 'connections', 'queries', 'cache', 'config']
+  userConnections: datastore({
+    filename: path.join(dbPath, 'user_connections.db')
+  }),
+  instances: [
+    'users',
+    'connections',
+    'queries',
+    'cache',
+    'config',
+    'userConnections'
+  ]
 };
 
 // Load dbs, migrate data, and apply indexes

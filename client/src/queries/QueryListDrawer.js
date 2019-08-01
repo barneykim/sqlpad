@@ -94,7 +94,8 @@ function QueryListDrawer({
   loadQueries,
   onClose,
   queries,
-  visible
+  visible,
+  userConnections
 }) {
   const [preview, setPreview] = useState(null);
   const [searches, setSearches] = useState([]);
@@ -117,10 +118,19 @@ function QueryListDrawer({
 
   const availableSearches = getAvailableSearchTags(queries);
 
+  const decoratedConnections =
+    currentUser.role === 'admin'
+      ? connections.map(connection => {
+          return connection;
+        })
+      : userConnections.map(connection => {
+          return connection;
+        });
+
   const filteredQueries = getSortedFilteredQueries(
     currentUser,
     queries,
-    connections,
+    decoratedConnections,
     creatorSearch,
     sort,
     connectionId,
@@ -208,7 +218,7 @@ function QueryListDrawer({
             onChange={e => setConnectionId(e.target.value)}
           >
             <option value="">All connections</option>
-            {connections.map(connection => {
+            {decoratedConnections.map(connection => {
               return (
                 <option key={connection._id} value={connection._id}>
                   {connection.name}
@@ -278,7 +288,7 @@ QueryListDrawer.propTypes = {
 };
 
 export default connect(
-  ['queries', 'connections', 'currentUser'],
+  ['queries', 'connections', 'currentUser', 'userConnections'],
   store => ({
     loadQueries: loadQueries(store),
     deleteQuery: deleteQuery(store)

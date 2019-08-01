@@ -25,6 +25,7 @@
     "react-measure": "^2.3.0",
     "react-router-dom": "^5.0.1",
     "react-scripts": "^3.0.1",
+    "react-select": "^3.0.4",
     "react-split-pane": "^0.1.87",
     "react-switch": "^5.0.0",
     "react-window": "^1.8.3",

@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const connections = require('../models/connections.js');
+const UserConnection = require('../models/UserConnection.js');
 const mustBeAdmin = require('../middleware/must-be-admin.js');
 const mustBeAuthenticated = require('../middleware/must-be-authenticated.js');
 const sendError = require('../lib/sendError');
@@ -67,6 +68,7 @@ router.put('/api/connections/:_id', mustBeAdmin, async function(req, res) {
 router.delete('/api/connections/:_id', mustBeAdmin, async function(req, res) {
   try {
     await connections.removeOneById(req.params._id);
+    await UserConnection.removeAllByConnectionId(req.params._id);
     return res.json({});
   } catch (error) {
     sendError(res, error, 'Problem deleting connection');
